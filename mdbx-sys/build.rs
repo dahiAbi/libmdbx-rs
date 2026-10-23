@@ -1,6 +1,6 @@
 use bindgen::{
-    callbacks::{IntKind, ParseCallbacks},
     Formatter,
+    callbacks::{IntKind, ParseCallbacks},
 };
 use std::{env, path::PathBuf};
 
@@ -98,6 +98,11 @@ fn main() {
         .flag_if_supported("-fvisibility=hidden")
         .flag_if_supported("-Wno-error=attributes");
 
+    // Position-independent code for shared libs (e.g. Android .so); MSVC ignores -fPIC.
+    if target_os != "windows" {
+        cc_builder.pic(true);
+    }
+
     if debug_assertions {
         cc_builder.define("MDBX_FORCE_ASSERTIONS", "1");
     } else {
@@ -111,10 +116,12 @@ fn main() {
         cc_builder.define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0");
     }
 
+    // Bionic has no __cpu_model; PID reuse checks are unreliable across Zygote forks.
+    // Do not define __ANDROID_API__ / __ANDROID_MIN_SDK_VERSION__ here — NDK clang sets
+    // them from the target triple (use cargo-ndk or …-android21-clang).
     if target_os == "android" {
         cc_builder.define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0");
         cc_builder.define("MDBX_ENV_CHECKPID", "0");
-	cc_builder.define("__ANDROID_MIN_SDK_VERSION__", "21");
     }
 
     let cflags = cc_builder.get_compiler().cflags_env();
@@ -123,9 +130,7 @@ fn main() {
     if target_os == "windows" {
         println!(r"cargo:rustc-link-lib=dylib=ntdll");
         println!(r"cargo:rustc-link-lib=dylib=user32");
-        println!(r"cargo:rustc-link-lib=dylib=kernel32");
         println!(r"cargo:rustc-link-lib=dylib=advapi32");
-        println!(r"cargo:rustc-link-lib=dylib=ole32");
     }
 
     cc_builder.file(mdbx.join("mdbx.c")).compile("libmdbx.a");
