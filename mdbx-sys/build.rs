@@ -1,6 +1,6 @@
 use bindgen::{
-    Formatter,
     callbacks::{IntKind, ParseCallbacks},
+    Formatter,
 };
 use std::{env, path::PathBuf};
 
@@ -109,6 +109,11 @@ fn main() {
     // __cpu_model is not available in musl
     if env::var("TARGET").unwrap().ends_with("-musl") {
         cc_builder.define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0");
+    }
+
+    if target_os == "android" {
+        cc_builder.define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0");
+        cc_builder.define("MDBX_ENV_CHECKPID", "0");
     }
 
     let cflags = cc_builder.get_compiler().cflags_env();
