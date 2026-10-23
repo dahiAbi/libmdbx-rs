@@ -549,11 +549,11 @@ impl Cursor<'_, RW> {
     /// the new data item, or on failure usually near it.
     pub fn put(&mut self, key: &[u8], data: &[u8], flags: WriteFlags) -> Result<()> {
         let key_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         let mut data_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: data.len(),
+            iov_len: data.len() as _,
             iov_base: data.as_ptr() as *mut c_void,
         };
         mdbx_result(unsafe {
@@ -585,7 +585,7 @@ impl Cursor<'_, RW> {
         flags: WriteFlags,
     ) -> Result<usize> {
         let key_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         put_multiple_with(values, value_len, |data| {
@@ -655,7 +655,7 @@ where
 unsafe fn slice_to_val(slice: Option<&[u8]>) -> ffi::MDBX_val {
     match slice {
         Some(slice) => ffi::MDBX_val {
-            iov_len: slice.len(),
+            iov_len: slice.len() as _,
             iov_base: slice.as_ptr() as *mut c_void,
         },
         None => ffi::MDBX_val {

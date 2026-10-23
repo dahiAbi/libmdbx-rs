@@ -36,7 +36,7 @@ pub trait Decodable<'tx> {
             if data_val.iov_len == 0 {
                 &[]
             } else {
-                slice::from_raw_parts(data_val.iov_base as *const u8, data_val.iov_len)
+                slice::from_raw_parts(data_val.iov_base as *const u8, data_val.iov_len as usize)
             }
         };
 
@@ -58,7 +58,7 @@ impl<'tx> Decodable<'tx> for Cow<'tx, [u8]> {
             if data_val.iov_len == 0 {
                 &[]
             } else {
-                slice::from_raw_parts(data_val.iov_base as *const u8, data_val.iov_len)
+                slice::from_raw_parts(data_val.iov_base as *const u8, data_val.iov_len as usize)
             }
         };
 

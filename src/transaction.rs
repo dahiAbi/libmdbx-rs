@@ -146,7 +146,7 @@ where
     {
         let key = key.as_ref();
         let key_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         let mut data_val: ffi::MDBX_val = ffi::MDBX_val {
@@ -309,16 +309,16 @@ pub(crate) fn put_multiple_with(
     };
     let mut data = [
         ffi::MDBX_val {
-            iov_len: value_len,
+            iov_len: value_len as _,
             iov_base: base as *mut c_void,
         },
         ffi::MDBX_val {
-            iov_len: values.len() / value_len,
+            iov_len: (values.len() / value_len) as _,
             iov_base: ptr::null_mut(),
         },
     ];
     mdbx_result(put(&mut data))?;
-    Ok(data[1].iov_len)
+    Ok(data[1].iov_len as _)
 }
 
 impl<E> Transaction<'_, RW, E>
@@ -359,11 +359,11 @@ where
         let key = key.as_ref();
         let data = data.as_ref();
         let key_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         let mut data_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: data.len(),
+            iov_len: data.len() as _,
             iov_base: data.as_ptr() as *mut c_void,
         };
         mdbx_result(txn_execute(&self.txn, |txn| unsafe {
@@ -396,7 +396,7 @@ where
     ) -> Result<usize> {
         let key = key.as_ref();
         let key_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         put_multiple_with(values, value_len, |data| {
@@ -437,11 +437,11 @@ where
     ) -> Result<R> {
         let key = key.as_ref();
         let key_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         let mut data_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: len,
+            iov_len: len as _,
             iov_base: ptr::null_mut::<c_void>(),
         };
         // The put and the user closure run under one lock hold: the reserved
@@ -468,8 +468,8 @@ where
                         &mut []
                     } else {
                         let base = data_val.iov_base as *mut u8;
-                        ptr::write_bytes(base, 0, data_val.iov_len);
-                        slice::from_raw_parts_mut(base, data_val.iov_len)
+                        ptr::write_bytes(base, 0, data_val.iov_len as _);
+                        slice::from_raw_parts_mut(base, data_val.iov_len as _)
                     }
                 };
                 write(buf)
@@ -493,11 +493,11 @@ where
     ) -> Result<bool> {
         let key = key.as_ref();
         let key_val: ffi::MDBX_val = ffi::MDBX_val {
-            iov_len: key.len(),
+            iov_len: key.len() as _,
             iov_base: key.as_ptr() as *mut c_void,
         };
         let data_val: Option<ffi::MDBX_val> = data.map(|data| ffi::MDBX_val {
-            iov_len: data.len(),
+            iov_len: data.len() as _,
             iov_base: data.as_ptr() as *mut c_void,
         });
 
