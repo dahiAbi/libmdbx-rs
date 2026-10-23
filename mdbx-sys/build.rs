@@ -114,6 +114,7 @@ fn main() {
     if target_os == "android" {
         cc_builder.define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0");
         cc_builder.define("MDBX_ENV_CHECKPID", "0");
+	cc_builder.define("__ANDROID_MIN_SDK_VERSION__", "21");
     }
 
     let cflags = cc_builder.get_compiler().cflags_env();
